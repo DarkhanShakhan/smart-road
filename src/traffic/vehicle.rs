@@ -4,13 +4,13 @@ use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
 
 // vehicle
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Copy)]
 pub struct Vehicle {
     pub position: Position,
     pub turn: Turning,
     pub direction: Direction,
     pub speed: Speed,
-    pub environment: Environment
+    pub environment: Environment,
 }
 
 const SAFE_DISTANCE: i32 = 10;
@@ -22,7 +22,7 @@ impl Vehicle {
             turn,
             direction,
             speed,
-            environment: Environment::new(w as i32,h as i32)
+            environment: Environment::new(w as i32, h as i32),
         }
     }
     pub fn accelerate(&mut self) {
@@ -45,28 +45,28 @@ impl Vehicle {
         match self.direction {
             Direction::North => self.position.y -= self.speed as i32,
             Direction::South => self.position.y += self.speed as i32,
-            Direction::East => self.position.x -= self.speed as i32,
-            Direction::West => self.position.x += self.speed as i32,
+            Direction::East => self.position.x += self.speed as i32,
+            Direction::West => self.position.x -= self.speed as i32,
         }
     }
 
     pub fn is_safe_distance(self, previous: Vehicle) -> bool {
         match self.direction {
             Direction::North => {
-                self.position.y - previous.position.y - self.speed as i32 > SAFE_DISTANCE
+                self.position.y - previous.position.y - 20- self.speed as i32 > SAFE_DISTANCE
             }
             Direction::South => {
-                previous.position.y - self.position.y - self.speed as i32 > SAFE_DISTANCE
+                previous.position.y - self.position.y -20- self.speed as i32 > SAFE_DISTANCE
             }
             Direction::West => {
-                self.position.x - previous.position.x - self.speed as i32 > SAFE_DISTANCE
+                self.position.x - previous.position.x -20- self.speed as i32 > SAFE_DISTANCE
             }
             Direction::East => {
-                previous.position.x - self.position.x - self.speed as i32 > SAFE_DISTANCE
+                previous.position.x - self.position.x -20- self.speed as i32 > SAFE_DISTANCE
             }
         }
     }
-    pub fn _render(&mut self, canvas: &mut WindowCanvas) {
+    pub fn render(&mut self, canvas: &mut WindowCanvas) {
         let rect = Rect::new(self.position.x, self.position.y, 20, 20);
         canvas.set_draw_color(Color::GREEN);
         canvas.fill_rect(rect).unwrap();
@@ -114,11 +114,11 @@ impl Rand for Direction {
 }
 
 //speed
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 pub enum Speed {
-    Low = 20,
-    Normal = 40,
-    High = 60,
+    Low = 5,
+    Normal = 10,
+    High = 15,
 }
 
 impl Rand for Speed {
@@ -151,17 +151,17 @@ impl Position {
                 x: (w as i32 / 2 + n),
                 y: (h as i32),
             },
-            Direction::East => Position {
-                x: (-20 - n),
-                y: (h as i32 / 2),
+            Direction::West => Position {
+                x: (w as i32),
+                y: (h as i32 / 2 - 20 - n),
             },
             Direction::South => Position {
-                x: (w as i32),
-                y: (h as i32 / 2 - 20 + n),
+                x: (w as i32 / 2 - 20 - n),
+                y: (-20),
             },
-            Direction::West => Position {
-                x: (w as i32 / 2 - 20),
-                y: (-20 - n),
+            Direction::East => Position {
+                x: (-20),
+                y: (w as i32 / 2 + n),
             },
         }
     }

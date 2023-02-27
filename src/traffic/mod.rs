@@ -1,7 +1,8 @@
+mod traffic;
 mod vehicle;
 // use std::collections::HashMap;
 // use std::vec;
-
+pub use traffic::*;
 pub use vehicle::*;
 
 // use sdl2::pixels::Color;
