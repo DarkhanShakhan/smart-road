@@ -27,6 +27,7 @@ impl Vehicle {
     }
     pub fn accelerate(&mut self) {
         match self.speed {
+            Speed::No => self.speed = Speed::Low,
             Speed::Low => self.speed = Speed::Normal,
             Speed::Normal => self.speed = Speed::High,
             Speed::High => {}
@@ -34,7 +35,8 @@ impl Vehicle {
     }
     pub fn deaccelerate(&mut self) {
         match self.speed {
-            Speed::Low => {}
+            Speed::No => {}
+            Speed::Low => self.speed = Speed::No,
             Speed::Normal => self.speed = Speed::Low,
             Speed::High => self.speed = Speed::Normal,
         }
@@ -53,18 +55,31 @@ impl Vehicle {
     pub fn is_safe_distance(self, previous: Vehicle) -> bool {
         match self.direction {
             Direction::North => {
-                self.position.y - previous.position.y - 20- self.speed as i32 > SAFE_DISTANCE
+                self.position.y - previous.position.y - 20 - self.speed as i32 > SAFE_DISTANCE
             }
             Direction::South => {
-                previous.position.y - self.position.y -20- self.speed as i32 > SAFE_DISTANCE
+                previous.position.y - self.position.y - 20 - self.speed as i32 > SAFE_DISTANCE
             }
             Direction::West => {
-                self.position.x - previous.position.x -20- self.speed as i32 > SAFE_DISTANCE
+                self.position.x - previous.position.x - 20 - self.speed as i32 > SAFE_DISTANCE
             }
             Direction::East => {
-                previous.position.x - self.position.x -20- self.speed as i32 > SAFE_DISTANCE
+                previous.position.x - self.position.x - 20 - self.speed as i32 > SAFE_DISTANCE
             }
         }
+    }
+    pub fn is_out(self) -> bool {
+        self.position.x > self.environment.width
+            || self.position.x < -20
+            || self.position.y > self.environment.height
+            || self.position.y < -20
+    }
+
+    pub fn in_intersection(self) -> bool {
+        self.position.x > (self.environment.center.x - 120)
+            && self.position.x < (self.environment.center.x + 100)
+            && self.position.y > (self.environment.center.y - 120)
+            && self.position.y < (self.environment.center.y + 100)
     }
     pub fn render(&mut self, canvas: &mut WindowCanvas) {
         let rect = Rect::new(self.position.x, self.position.y, 20, 20);
@@ -116,6 +131,7 @@ impl Rand for Direction {
 //speed
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 pub enum Speed {
+    No = 0,
     Low = 5,
     Normal = 10,
     High = 15,
@@ -172,10 +188,18 @@ impl Position {
 pub struct Environment {
     pub width: i32,
     pub height: i32,
+    center: Position,
 }
 
 impl Environment {
     pub fn new(width: i32, height: i32) -> Environment {
-        Environment { width, height }
+        Environment {
+            width,
+            height,
+            center: Position {
+                x: width / 2,
+                y: height / 2,
+            },
+        }
     }
 }

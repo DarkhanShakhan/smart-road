@@ -1,10 +1,11 @@
+mod intersection;
 mod traffic;
 mod vehicle;
 // use std::collections::HashMap;
 // use std::vec;
+pub use intersection::*;
 pub use traffic::*;
 pub use vehicle::*;
-
 // use sdl2::pixels::Color;
 // use sdl2::rect::Rect;
 // use sdl2::render::WindowCanvas;

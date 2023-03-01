@@ -38,7 +38,7 @@ fn main() {
                     keycode: Some(Keycode::Down),
                     ..
                 } => {
-                    traffic.add(Vehicle::new(
+                    traffic.add_back(Vehicle::new(
                         width,
                         height,
                         rng.gen(),
@@ -50,7 +50,7 @@ fn main() {
                     keycode: Some(Keycode::Up),
                     ..
                 } => {
-                    traffic.add(Vehicle::new(
+                    traffic.add_back(Vehicle::new(
                         width,
                         height,
                         rng.gen(),
@@ -62,7 +62,7 @@ fn main() {
                     keycode: Some(Keycode::Left),
                     ..
                 } => {
-                    traffic.add(Vehicle::new(
+                    traffic.add_back(Vehicle::new(
                         width,
                         height,
                         rng.gen(),
@@ -74,7 +74,7 @@ fn main() {
                     keycode: Some(Keycode::Right),
                     ..
                 } => {
-                    traffic.add(Vehicle::new(
+                    traffic.add_back(Vehicle::new(
                         width,
                         height,
                         rng.gen(),
@@ -86,7 +86,7 @@ fn main() {
                     keycode: Some(Keycode::R),
                     ..
                 } => {
-                    traffic.add(Vehicle::new(width, height, rng.gen(), rng.gen(), rng.gen()));
+                    traffic.add_back(Vehicle::new(width, height, rng.gen(), rng.gen(), rng.gen()));
                 }
                 _ => {}
             }
@@ -94,7 +94,10 @@ fn main() {
         canvas.set_draw_color(Color::GREY);
         canvas.clear();
         update_layout(&mut canvas);
-        traffic.regulate(&mut canvas);
+        match traffic.regulate(&mut canvas) {
+            Some(v) => println!("{}", v.len()),
+            None => {}
+        }
         canvas.present();
 
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 6));
