@@ -21,20 +21,18 @@ impl Traffic {
             east: Branch::new(),
         }
     }
-    pub fn add_back(&mut self, v: Vehicle) {
+    pub fn add_vehicle(&mut self, v: Vehicle) {
         match v.direction {
-            Direction::North => self.north.add_back(v),
-            Direction::South => self.south.add_back(v),
-            Direction::East => self.east.add_back(v),
-            Direction::West => self.west.add_back(v),
+            Direction::North => self.north.add_vehicle(v),
+            Direction::South => self.south.add_vehicle(v),
+            Direction::East => self.east.add_vehicle(v),
+            Direction::West => self.west.add_vehicle(v),
         }
     }
-    pub fn add_front(&mut self, v: Vehicle) {
-        match v.direction {
-            Direction::North => self.north.add_front(v),
-            Direction::South => self.south.add_front(v),
-            Direction::East => self.east.add_front(v),
-            Direction::West => self.west.add_front(v),
+
+    pub fn add_vehicles(&mut self, vs: Vec<Vehicle>) {
+        for v in vs {
+            self.add_vehicle(v);
         }
     }
     pub fn regulate(&mut self, canvas: &mut WindowCanvas) -> Option<Vec<Vehicle>> {
@@ -78,18 +76,11 @@ impl Branch {
             right: Lane::new(),
         }
     }
-    fn add_back(&mut self, v: Vehicle) {
+    fn add_vehicle(&mut self, v: Vehicle) {
         match v.turn {
             Turning::Left => self.left.add_back(v),
             Turning::Straight => self.straight.add_back(v),
             Turning::Right => self.right.add_back(v),
-        }
-    }
-    fn add_front(&mut self, v: Vehicle) {
-        match v.turn {
-            Turning::Left => self.left.add_front(v),
-            Turning::Straight => self.straight.add_front(v),
-            Turning::Right => self.right.add_front(v),
         }
     }
     fn regulate(&mut self, canvas: &mut WindowCanvas) -> Option<Vec<Vehicle>> {
@@ -155,9 +146,6 @@ impl Lane {
     }
     fn add_back(&mut self, v: Vehicle) {
         self.vehicles.push_back(v);
-    }
-    fn add_front(&mut self, v: Vehicle) {
-        self.vehicles.push_front(v);
     }
     fn drop_vehicle(&mut self) -> Option<Vehicle> {
         self.vehicles.pop_front()

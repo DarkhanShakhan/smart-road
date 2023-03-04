@@ -25,7 +25,7 @@ fn main() {
     canvas.present();
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut rng = rand::thread_rng();
-    let mut traffic = Traffic::new();
+    let mut smart_road = SmartRoad::new();
     'running: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -38,7 +38,7 @@ fn main() {
                     keycode: Some(Keycode::Down),
                     ..
                 } => {
-                    traffic.add_back(Vehicle::new(
+                    smart_road.add_vehicle(Vehicle::new(
                         width,
                         height,
                         rng.gen(),
@@ -50,7 +50,7 @@ fn main() {
                     keycode: Some(Keycode::Up),
                     ..
                 } => {
-                    traffic.add_back(Vehicle::new(
+                    smart_road.add_vehicle(Vehicle::new(
                         width,
                         height,
                         rng.gen(),
@@ -62,7 +62,7 @@ fn main() {
                     keycode: Some(Keycode::Left),
                     ..
                 } => {
-                    traffic.add_back(Vehicle::new(
+                    smart_road.add_vehicle(Vehicle::new(
                         width,
                         height,
                         rng.gen(),
@@ -74,7 +74,7 @@ fn main() {
                     keycode: Some(Keycode::Right),
                     ..
                 } => {
-                    traffic.add_back(Vehicle::new(
+                    smart_road.add_vehicle(Vehicle::new(
                         width,
                         height,
                         rng.gen(),
@@ -86,7 +86,13 @@ fn main() {
                     keycode: Some(Keycode::R),
                     ..
                 } => {
-                    traffic.add_back(Vehicle::new(width, height, rng.gen(), rng.gen(), rng.gen()));
+                    smart_road.add_vehicle(Vehicle::new(
+                        width,
+                        height,
+                        rng.gen(),
+                        rng.gen(),
+                        rng.gen(),
+                    ));
                 }
                 _ => {}
             }
@@ -94,10 +100,7 @@ fn main() {
         canvas.set_draw_color(Color::GREY);
         canvas.clear();
         update_layout(&mut canvas);
-        match traffic.regulate(&mut canvas) {
-            Some(v) => println!("{}", v.len()),
-            None => {}
-        }
+        smart_road.regulate(&mut canvas);
         canvas.present();
 
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 6));

@@ -11,6 +11,7 @@ pub struct Vehicle {
     pub direction: Direction,
     pub speed: Speed,
     pub environment: Environment,
+    pub pivot: Pivot,
 }
 
 const SAFE_DISTANCE: i32 = 10;
@@ -23,6 +24,7 @@ impl Vehicle {
             direction,
             speed,
             environment: Environment::new(w as i32, h as i32),
+            pivot: Position { x: 0, y: 0 },
         }
     }
     pub fn accelerate(&mut self) {
@@ -49,6 +51,9 @@ impl Vehicle {
             Direction::South => self.position.y += self.speed as i32,
             Direction::East => self.position.x += self.speed as i32,
             Direction::West => self.position.x -= self.speed as i32,
+        }
+        match self.turn {
+            Turning::Straight => {}
         }
     }
 
@@ -85,6 +90,33 @@ impl Vehicle {
         let rect = Rect::new(self.position.x, self.position.y, 20, 20);
         canvas.set_draw_color(Color::GREEN);
         canvas.fill_rect(rect).unwrap();
+    }
+}
+
+#[derive(Clone, Debug, Copy)]
+pub struct Pivot {
+    position: Position,
+    over: bool,
+}
+
+impl Pivot {
+    pub fn new(env: Environment, dir: Direction, turn: Turning) -> Self {
+        let mut pos = env.center;
+        let mut over = true;
+        match turn {
+            Turning::Straight => {}
+            Turning::Right => match dir {
+                Direction::North => {
+                    pos = Position {
+                        x: (env.center.x + 20),
+                        y: (env.center.y + 20),
+                    };
+                    over = false;
+                },
+                Direction::
+            },
+        }
+        pivot
     }
 }
 
