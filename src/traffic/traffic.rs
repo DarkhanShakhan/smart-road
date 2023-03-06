@@ -29,12 +29,6 @@ impl Traffic {
             Direction::West => self.west.add_vehicle(v),
         }
     }
-
-    pub fn add_vehicles(&mut self, vs: Vec<Vehicle>) {
-        for v in vs {
-            self.add_vehicle(v);
-        }
-    }
     pub fn regulate(&mut self, canvas: &mut WindowCanvas) -> Option<Vec<Vehicle>> {
         let mut res = vec![];
         match self.north.regulate(canvas) {

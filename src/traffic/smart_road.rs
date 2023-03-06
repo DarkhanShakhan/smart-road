@@ -1,11 +1,11 @@
 use sdl2::render::WindowCanvas;
 
-use super::{Intersection, Traffic, Vehicle};
+use super::{Intersection, Released, Traffic, Vehicle};
 
 pub struct SmartRoad {
     pub intersection: Intersection,
     pub traffic: Traffic,
-    pub released: Traffic,
+    pub released: Released,
 }
 
 impl SmartRoad {
@@ -13,7 +13,7 @@ impl SmartRoad {
         SmartRoad {
             intersection: Intersection::new(),
             traffic: Traffic::new(),
-            released: Traffic::new(),
+            released: Released::new(),
         }
     }
 
@@ -31,10 +31,7 @@ impl SmartRoad {
             Some(vehicles) => from_int = vehicles,
             None => {}
         }
-        match self.released.regulate(canvas) {
-            Some(vehicles) => println!("still there: {}", vehicles.len()),
-            None => {}
-        }
+        self.released.regulate(canvas);
         if to_int.len() > 0 {
             self.intersection.add_vehicles(to_int)
         }

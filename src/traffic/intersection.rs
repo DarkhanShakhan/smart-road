@@ -1,4 +1,4 @@
-use super::Vehicle;
+use super::{Turning, Vehicle};
 use sdl2::render::WindowCanvas;
 use std::collections::VecDeque;
 
@@ -21,7 +21,39 @@ impl Intersection {
     }
     pub fn instruct_vehicle(&mut self, v: &Vehicle) -> VecDeque<Instruction> {
         let mut res = VecDeque::new();
-        //TODO: program an algorithm
+        match v.turn {
+            Turning::Right => {
+                res.push_back(Instruction::Accelerate);
+                res.push_back(Instruction::Accelerate);
+                res.push_back(Instruction::Accelerate);
+                res.push_back(Instruction::Accelerate);
+                res.push_back(Instruction::Accelerate);
+                res.push_back(Instruction::Accelerate);
+                res.push_back(Instruction::Accelerate);
+                res.push_back(Instruction::Accelerate);
+            }
+            _ => {
+                res.push_back(Instruction::Deaccelerate);
+                res.push_back(Instruction::Accelerate);
+                res.push_back(Instruction::Still);
+                res.push_back(Instruction::Deaccelerate);
+                res.push_back(Instruction::Deaccelerate);
+                res.push_back(Instruction::Deaccelerate);
+                res.push_back(Instruction::Accelerate);
+                res.push_back(Instruction::Still);
+                res.push_back(Instruction::Accelerate);
+                res.push_back(Instruction::Accelerate);
+                res.push_back(Instruction::Accelerate);
+                res.push_back(Instruction::Accelerate);
+                res.push_back(Instruction::Still);
+                res.push_back(Instruction::Accelerate);
+                res.push_back(Instruction::Accelerate);
+                res.push_back(Instruction::Accelerate);
+                res.push_back(Instruction::Accelerate);
+                res.push_back(Instruction::Accelerate);
+            }
+        }
+
         res
     }
     pub fn regulate(&mut self, canvas: &mut WindowCanvas) -> Option<Vec<Vehicle>> {

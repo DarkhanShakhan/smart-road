@@ -1,10 +1,12 @@
 mod intersection;
+mod released;
 mod smart_road;
 mod traffic;
 mod vehicle;
 // use std::collections::HashMap;
 // use std::vec;
 pub use intersection::*;
+pub use released::*;
 pub use smart_road::*;
 pub use traffic::*;
 pub use vehicle::*;

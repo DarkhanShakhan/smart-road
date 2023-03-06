@@ -24,7 +24,7 @@ impl Vehicle {
             direction,
             speed,
             environment: Environment::new(w as i32, h as i32),
-            pivot: Position { x: 0, y: 0 },
+            pivot: Pivot::new(Environment::new(w as i32, h as i32), direction, turn),
         }
     }
     pub fn accelerate(&mut self) {
@@ -54,6 +54,56 @@ impl Vehicle {
         }
         match self.turn {
             Turning::Straight => {}
+            Turning::Left => {
+                if self.is_at_pivot() {
+                    self.turn = Turning::Straight;
+                    self.position = self.pivot.position;
+                    match self.direction {
+                        Direction::North => {
+                            self.direction = Direction::West;
+                        }
+                        Direction::South => {
+                            self.direction = Direction::East;
+                        }
+                        Direction::East => {
+                            self.direction = Direction::North;
+                        }
+                        Direction::West => {
+                            self.direction = Direction::South;
+                        }
+                    }
+                }
+            }
+            Turning::Right => {
+                if self.is_at_pivot() {
+                    self.turn = Turning::Straight;
+                    self.position = self.pivot.position;
+                    match self.direction {
+                        Direction::North => {
+                            self.direction = Direction::East;
+                        }
+                        Direction::South => {
+                            self.direction = Direction::West;
+                        }
+                        Direction::East => {
+                            self.direction = Direction::South;
+                        }
+                        Direction::West => {
+                            self.direction = Direction::North;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    pub fn is_at_pivot(self) -> bool {
+        match self.pivot.over {
+            true => {
+                self.position.x >= self.pivot.position.x && self.position.y >= self.pivot.position.y
+            }
+            false => {
+                self.position.x <= self.pivot.position.x && self.position.y <= self.pivot.position.y
+            }
         }
     }
 
@@ -108,15 +158,68 @@ impl Pivot {
             Turning::Right => match dir {
                 Direction::North => {
                     pos = Position {
-                        x: (env.center.x + 20),
-                        y: (env.center.y + 20),
+                        x: (env.center.x + 40),
+                        y: (env.center.y + 40),
                     };
                     over = false;
-                },
-                Direction::
+                }
+                Direction::South => {
+                    pos = Position {
+                        x: (env.center.x - 60),
+                        y: (env.center.y - 60),
+                    };
+                    over = true;
+                }
+                Direction::West => {
+                    pos = Position {
+                        x: (env.center.x + 40),
+                        y: (env.center.y - 60),
+                    };
+                    over = false;
+                }
+                Direction::East => {
+                    pos = Position {
+                        x: (env.center.x - 60),
+                        y: (env.center.y + 40),
+                    };
+                    over = true;
+                }
+            },
+            Turning::Left => match dir {
+                Direction::North => {
+                    pos = Position {
+                        x: (env.center.x),
+                        y: (env.center.y -20),
+                    };
+                    over = false;
+                }
+                Direction::South => {
+                    pos = Position {
+                        x: (env.center.x - 20),
+                        y: (env.center.y),
+                    };
+                    over = true;
+                }
+                Direction::West => {
+                    pos = Position {
+                        x: (env.center.x -20),
+                        y: (env.center.y - 20),
+                    };
+                    over = false;
+                }
+                Direction::East => {
+                    pos = Position {
+                        x: (env.center.x ),
+                        y: (env.center.y ),
+                    };
+                    over = true;
+                }
             },
         }
-        pivot
+        Pivot {
+            position: pos,
+            over,
+        }
     }
 }
 
