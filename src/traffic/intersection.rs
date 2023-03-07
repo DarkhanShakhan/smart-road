@@ -13,7 +13,6 @@ impl Intersection {
         }
     }
     pub fn add_vehicles(&mut self, cands: Vec<Vehicle>) {
-        println!("Adds {} vehicles", cands.len());
         for v in cands {
             let instrs = self.instruct_vehicle(&v);
             self.vehicles.push_back(InstructedVehicle::new(v, instrs));
@@ -23,14 +22,9 @@ impl Intersection {
         let mut res = VecDeque::new();
         match v.turn {
             Turning::Right => {
-                res.push_back(Instruction::Accelerate);
-                res.push_back(Instruction::Accelerate);
-                res.push_back(Instruction::Accelerate);
-                res.push_back(Instruction::Accelerate);
-                res.push_back(Instruction::Accelerate);
-                res.push_back(Instruction::Accelerate);
-                res.push_back(Instruction::Accelerate);
-                res.push_back(Instruction::Accelerate);
+                for _ in 0..7 {
+                    res.push_back(Instruction::Accelerate);
+                }
             }
             _ => {
                 res.push_back(Instruction::Deaccelerate);
@@ -71,7 +65,6 @@ impl Intersection {
             self.vehicles.remove(jx);
         }
         if result.len() != 0 {
-            println!("Out vehicles {}", result.len());
             Some(result)
         } else {
             None
@@ -111,4 +104,39 @@ pub enum Instruction {
     Deaccelerate,
     Still,
     Accelerate,
+}
+
+pub struct Moves {
+    states: VecDeque<State>
+}
+
+impl Moves {
+    pub fn new() -> Self{
+        Moves { states: VecDeque::new() }
+    }
+    pub fn add_state(&mut self) {
+        self.states.push_back(State::new())
+    } 
+    pub fn drop_state(&mut self) {
+        self.states.pop_front();
+    }
+}
+
+
+pub struct State {
+    board: Vec<Vec<bool>>    
+}
+
+impl State {
+    pub fn new() -> Self {
+        let line = vec![false;6];
+        State { board: vec![line;6] }
+    }
+    pub fn is_occupied(self,x:usize,y :usize) -> bool {
+        self.board[x][y]
+    }
+
+    pub fn occupy(&mut self, x:usize, y:usize) {
+        self.board[x][y] = true
+    }
 }

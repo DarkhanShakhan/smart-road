@@ -45,7 +45,6 @@ impl Vehicle {
     }
 
     pub fn drive(&mut self) {
-        // FIXME: turning
         match self.direction {
             Direction::North => self.position.y -= self.speed as i32,
             Direction::South => self.position.y += self.speed as i32,
@@ -110,16 +109,16 @@ impl Vehicle {
     pub fn is_safe_distance(self, previous: Vehicle) -> bool {
         match self.direction {
             Direction::North => {
-                self.position.y - previous.position.y - 20 - self.speed as i32 > SAFE_DISTANCE
+                self.position.y - previous.position.y - 30 - self.speed as i32 > SAFE_DISTANCE
             }
             Direction::South => {
-                previous.position.y - self.position.y - 20 - self.speed as i32 > SAFE_DISTANCE
+                previous.position.y - self.position.y - 30 - self.speed as i32 > SAFE_DISTANCE
             }
             Direction::West => {
-                self.position.x - previous.position.x - 20 - self.speed as i32 > SAFE_DISTANCE
+                self.position.x - previous.position.x - 30 - self.speed as i32 > SAFE_DISTANCE
             }
             Direction::East => {
-                previous.position.x - self.position.x - 20 - self.speed as i32 > SAFE_DISTANCE
+                previous.position.x - self.position.x - 30 - self.speed as i32 > SAFE_DISTANCE
             }
         }
     }
