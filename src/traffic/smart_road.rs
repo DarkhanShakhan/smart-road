@@ -38,5 +38,6 @@ impl SmartRoad {
         if from_int.len() > 0 {
             self.released.add_vehicles(from_int)
         }
+        self.intersection.moves.drop_state();
     }
 }

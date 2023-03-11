@@ -130,10 +130,10 @@ impl Vehicle {
     }
 
     pub fn in_intersection(self) -> bool {
-        self.position.x > (self.environment.center.x - 120)
-            && self.position.x < (self.environment.center.x + 100)
-            && self.position.y > (self.environment.center.y - 120)
-            && self.position.y < (self.environment.center.y + 100)
+        self.position.x > (self.environment.center.x - 220)
+            && self.position.x < (self.environment.center.x + 200)
+            && self.position.y > (self.environment.center.y - 220)
+            && self.position.y < (self.environment.center.y + 200)
     }
     pub fn render(&mut self, canvas: &mut WindowCanvas) {
         let rect = Rect::new(self.position.x, self.position.y, 20, 20);
@@ -188,7 +188,7 @@ impl Pivot {
                 Direction::North => {
                     pos = Position {
                         x: (env.center.x),
-                        y: (env.center.y -20),
+                        y: (env.center.y - 20),
                     };
                     over = false;
                 }
@@ -201,15 +201,15 @@ impl Pivot {
                 }
                 Direction::West => {
                     pos = Position {
-                        x: (env.center.x -20),
+                        x: (env.center.x - 20),
                         y: (env.center.y - 20),
                     };
                     over = false;
                 }
                 Direction::East => {
                     pos = Position {
-                        x: (env.center.x ),
-                        y: (env.center.y ),
+                        x: (env.center.x),
+                        y: (env.center.y),
                     };
                     over = true;
                 }
@@ -322,7 +322,7 @@ impl Position {
 pub struct Environment {
     pub width: i32,
     pub height: i32,
-    center: Position,
+    pub center: Position,
 }
 
 impl Environment {
