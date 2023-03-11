@@ -13,7 +13,7 @@ fn main() {
     let video_subsystem = sdl_context.video().unwrap();
 
     let window = video_subsystem
-        .window("smart-road", 700, 700)
+        .window("smart-road", 800, 800)
         .position_centered()
         .build()
         .unwrap();

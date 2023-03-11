@@ -2,7 +2,6 @@ use super::Vehicle;
 use sdl2::render::WindowCanvas;
 use std::collections::{HashMap, VecDeque};
 
-
 //TODO: safe distance in intersection
 pub struct Intersection {
     pub vehicles: VecDeque<InstructedVehicle>,
@@ -315,6 +314,24 @@ impl Algorithm {
                 let ok = sim_moves.states[0].is_occupied(a as usize, *b as usize);
                 if ok {
                     return VecDeque::new();
+                }
+                if sim_moves.states.len() > 1 {
+                    let ok = sim_moves.states[1].is_occupied(a as usize, *b as usize);
+                    if ok {
+                        return VecDeque::new();
+                    }
+                }
+                if sim_moves.states.len() > 2 {
+                    let ok = sim_moves.states[2].is_occupied(a as usize, *b as usize);
+                    if ok {
+                        return VecDeque::new();
+                    }
+                }
+                if sim_moves.states.len() > 3 {
+                    let ok = sim_moves.states[3].is_occupied(a as usize, *b as usize);
+                    if ok {
+                        return VecDeque::new();
+                    }
                 }
                 // sim_moves.states[0].occupy(a as usize, *b as usize);
             }

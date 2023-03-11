@@ -12,12 +12,20 @@ pub struct Vehicle {
     pub speed: Speed,
     pub environment: Environment,
     pub pivot: Pivot,
+    pub color: Color,
 }
 
 const SAFE_DISTANCE: i32 = 10;
 
 impl Vehicle {
     pub fn new(w: u32, h: u32, turn: Turning, direction: Direction, speed: Speed) -> Self {
+        let mut color = Color::MAGENTA;
+        match direction {
+            Direction::North => color = Color::GREEN,
+            Direction::South => color = Color::YELLOW,
+            Direction::West => color = Color::CYAN,
+            Direction::East => {}
+        }
         Vehicle {
             position: Position::new(w, h, turn, direction),
             turn,
@@ -25,6 +33,7 @@ impl Vehicle {
             speed,
             environment: Environment::new(w as i32, h as i32),
             pivot: Pivot::new(Environment::new(w as i32, h as i32), direction, turn),
+            color: color,
         }
     }
     pub fn accelerate(&mut self) {
@@ -137,7 +146,7 @@ impl Vehicle {
     }
     pub fn render(&mut self, canvas: &mut WindowCanvas) {
         let rect = Rect::new(self.position.x, self.position.y, 20, 20);
-        canvas.set_draw_color(Color::GREEN);
+        canvas.set_draw_color(self.color);
         canvas.fill_rect(rect).unwrap();
     }
 }
