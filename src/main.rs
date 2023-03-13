@@ -103,14 +103,14 @@ fn main() {
         smart_road.regulate(&mut canvas);
         canvas.present();
 
-        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 10));
+        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 8));
     }
 }
 
 fn update_layout(canvas: &mut WindowCanvas) {
     let (width, height) = canvas.output_size().unwrap();
     let (center_w, center_h) = (width as i32 / 2, height as i32 / 2);
-    let x = 20;
+    let x = 40;
     let (l_lane1, l_lane2, l_lane3) = (center_w - x, center_w - 2 * x, center_w - 3 * x);
     let (low_lane1, low_lane2, low_lane3) = (center_h - x, center_h - 2 * x, center_h - 3 * x);
     let (r_lane1, r_lane2, r_lane3) = (center_w + x, center_w + 2 * x, center_w + 3 * x);

@@ -115,12 +115,12 @@ impl Vehicle {
     }
     pub fn is_out(self) -> bool {
         self.position.x > self.environment.width
-            || self.position.x < -20
+            || self.position.x < -40
             || self.position.y > self.environment.height
-            || self.position.y < -20
+            || self.position.y < -40
     }
     pub fn render(&mut self, canvas: &mut WindowCanvas) {
-        let rect = Rect::new(self.position.x, self.position.y, 20, 20);
+        let rect = Rect::new(self.position.x, self.position.y, 40, 40);
         canvas.set_draw_color(self.color);
         canvas.fill_rect(rect).unwrap();
     }
@@ -141,29 +141,29 @@ impl Pivot {
             Turning::Right => match dir {
                 Direction::North => {
                     pos = Position {
-                        x: (env.center.x + 40),
-                        y: (env.center.y + 40),
+                        x: (env.center.x + 80),
+                        y: (env.center.y + 80),
                     };
                     over = false;
                 }
                 Direction::South => {
                     pos = Position {
-                        x: (env.center.x - 60),
-                        y: (env.center.y - 60),
+                        x: (env.center.x - 120),
+                        y: (env.center.y - 120),
                     };
                     over = true;
                 }
                 Direction::West => {
                     pos = Position {
-                        x: (env.center.x + 40),
-                        y: (env.center.y - 60),
+                        x: (env.center.x + 80),
+                        y: (env.center.y - 120),
                     };
                     over = false;
                 }
                 Direction::East => {
                     pos = Position {
-                        x: (env.center.x - 60),
-                        y: (env.center.y + 40),
+                        x: (env.center.x - 120),
+                        y: (env.center.y + 80),
                     };
                     over = true;
                 }
@@ -172,21 +172,21 @@ impl Pivot {
                 Direction::North => {
                     pos = Position {
                         x: (env.center.x),
-                        y: (env.center.y - 20),
+                        y: (env.center.y - 40),
                     };
                     over = false;
                 }
                 Direction::South => {
                     pos = Position {
-                        x: (env.center.x - 20),
+                        x: (env.center.x - 40),
                         y: (env.center.y),
                     };
                     over = true;
                 }
                 Direction::West => {
                     pos = Position {
-                        x: (env.center.x - 20),
-                        y: (env.center.y - 20),
+                        x: (env.center.x - 40),
+                        y: (env.center.y - 40),
                     };
                     over = false;
                 }
@@ -250,9 +250,9 @@ impl Rand for Direction {
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 pub enum Speed {
     No = 0,
-    Low = 5,
-    Normal = 10,
-    High = 15,
+    Low = 10,
+    Normal = 20,
+    High = 30,
 }
 
 impl Rand for Speed {
@@ -277,8 +277,8 @@ impl Position {
         let mut n = 0;
         match turn {
             Turning::Left => {}
-            Turning::Right => n += 40,
-            Turning::Straight => n += 20,
+            Turning::Right => n += 80,
+            Turning::Straight => n += 40,
         }
         match dir {
             Direction::North => Position {
@@ -287,14 +287,14 @@ impl Position {
             },
             Direction::West => Position {
                 x: (w as i32),
-                y: (h as i32 / 2 - 20 - n),
+                y: (h as i32 / 2 - 40 - n),
             },
             Direction::South => Position {
-                x: (w as i32 / 2 - 20 - n),
-                y: (-20),
+                x: (w as i32 / 2 - 40 - n),
+                y: (-40),
             },
             Direction::East => Position {
-                x: (-20),
+                x: (-40),
                 y: (w as i32 / 2 + n),
             },
         }
