@@ -2,10 +2,10 @@ use super::Vehicle;
 use sdl2::render::WindowCanvas;
 use std::collections::{HashMap, VecDeque};
 
-//TODO: safe distance in intersection
 pub struct Intersection {
     pub vehicles: VecDeque<InstructedVehicle>,
     pub moves: Moves,
+    pub waiting_room: Vec<Vehicle>,
 }
 
 impl Intersection {
@@ -13,44 +13,48 @@ impl Intersection {
         Intersection {
             vehicles: VecDeque::new(),
             moves: Moves::new(),
+            waiting_room: vec![],
         }
     }
-    pub fn add_vehicles(&mut self, cands: Vec<Vehicle>) {
-        for v in cands {
-            let instrs = self.instruct_vehicle(&v);
-            self.vehicles.push_back(InstructedVehicle::new(v, instrs));
+    pub fn waiting(&mut self) {
+        let list = self.waiting_room.clone();
+        self.waiting_room = vec![];
+        for v in list {
+            self.add_vehicle(v);
         }
+    }
+    pub fn add_vehicle(&mut self, v: Vehicle) {
+        let instrs = self.instruct_vehicle(&v);
+        if instrs.len() == 0 {
+            self.waiting_room.push(v);
+            return
+        }
+        self.vehicles.push_back(InstructedVehicle::new(v, instrs));
     }
     pub fn instruct_vehicle(&mut self, v: &Vehicle) -> VecDeque<Instruction> {
         let mut algo = Algorithm::new();
         let mut res = algo.algorithm(&self.moves, v, VecDeque::new());
+        if res.len() == 0 && self.moves.states.len() > 0 {
+            return VecDeque::new()
+        }
         let mut sim_v = v.clone();
         let mut ix = 0;
-        let center = v.environment.center;
-        while sim_v.in_intersection() {
-            let mut x = (sim_v.position.x - (center.x - 60)) / 2;
-            let mut y = (sim_v.position.y - (center.y - 60)) / 2;
+        while !sim_v.is_out() {
+            let x = sim_v.position.x / 2;
+            let y = sim_v.position.y / 2;
             if ix >= self.moves.states.len() {
                 self.moves.add_state();
             }
-            if x < 50 && y < 50 && x > -10 && y > -10 {
-                if x < 0 {
-                    x = 0
-                }
-                if y < 0 {
-                    y = 0
-                }
-                let (mut xs, mut ys) = (vec![x / 10], vec![y / 10]);
-                if x % 10 != 0 {
-                    xs.push((x / 10) + 1);
-                }
-                if y % 10 != 0 {
-                    ys.push((y / 10) + 1);
-                }
-                for a in xs {
-                    for b in &ys {
-                        self.moves.states[ix].occupy(a as usize, *b as usize);
-                    }
+            let (mut xs, mut ys) = (vec![x / 10], vec![y / 10]);
+            if x % 10 != 0 {
+                xs.push((x / 10) + 1);
+            }
+            if y % 10 != 0 {
+                ys.push((y / 10) + 1);
+            }
+            for a in xs {
+                for b in &ys {
+                    self.moves.states[ix].occupy(a as usize, *b as usize);
                 }
             }
             if ix >= res.len() {
@@ -61,6 +65,7 @@ impl Intersection {
                     res.push_back(Instruction::Still);
                 }
                 sim_v.drive();
+                ix += 1;
                 continue;
             }
             match res[ix] {
@@ -155,61 +160,25 @@ pub struct State {
 
 impl State {
     pub fn new() -> Self {
-        let line = vec![false; 6];
+        let line = vec![false; 40];
         State {
-            board: vec![line; 6],
+            board: vec![line; 40],
         }
     }
     pub fn is_occupied(&mut self, x: usize, y: usize) -> bool {
+        if x >= 40 || y >= 40 {
+            return false;
+        }
         self.board[x][y]
     }
 
     pub fn occupy(&mut self, x: usize, y: usize) {
-        if x > 5 || y > 5 {
+        if x >= 40 || y >= 40 {
             return;
         }
         self.board[x][y] = true
     }
 }
-// pub fn route(v: &Vehicle) -> Vec<(usize, usize)> {
-//     let mut res = vec![];
-//     match v.direction {
-//         super::Direction::North => match v.turn {
-//             Turning::Right => res.push((5, 5)),
-//             Turning::Straight => {
-//                 for ix in 0..5 {
-//                     res.push((4, ix));
-//                 }
-//             }
-//             Turning::Left => {
-//                 for ix in 2..5 {
-//                     res.push((3, ix));
-//                 }
-//                 for ix in 0..2 {
-//                     res.push((ix, 2));
-//                 }
-//             }
-//         },
-//         super::Direction::South => match v.turn {
-//             Turning::Right => res.push((0, 0)),
-//             Turning::Straight => {
-//                 for ix in 0..5 {
-//                     res.push((1, ix));
-//                 }
-//             }
-//             Turning::Left => {
-//                 for ix in 0..3 {
-//                     res.push((2, ix));
-//                 }
-//                 for ix in 3..5 {
-//                     res.push((ix, 3))
-//                 }
-//             }
-//         },
-//         _ => {}
-//     }
-//     res
-// }
 
 pub struct Algorithm {
     visited: HashMap<String, VecDeque<Instruction>>,
@@ -228,7 +197,7 @@ impl Algorithm {
         v: &Vehicle,
         instr: VecDeque<Instruction>,
     ) -> VecDeque<Instruction> {
-        if !v.in_intersection() || moves.states.len() == 0 {
+        if v.is_out() || moves.states.len() == 0 {
             return instr;
         }
         let mut algo = (0, 0, 0);
@@ -248,59 +217,8 @@ impl Algorithm {
             }
             return res;
         }
-        let center = v.environment.center;
-        let mut x = (v.position.x - (center.x - 60)) / 2;
-        let mut y = (v.position.y - (center.y - 60)) / 2;
-        if x >= 50 || y >= 50 || x < -10 || y < -10 {
-            let mut sim_v1 = v.clone();
-            let mut m1 = moves.clone();
-            let mut instr1 = instr.clone();
-            let mut res = VecDeque::new();
-            if v.speed != super::Speed::High {
-                sim_v1.accelerate();
-                sim_v1.drive();
-                m1.drop_state();
-                instr1.push_back(Instruction::Accelerate);
-                res = self.algorithm(&m1, &sim_v1, instr1);
-                if res.len() > 0 {
-                    self.visited.insert(key, res.clone());
-                    return res;
-                }
-            }
-            if v.speed != super::Speed::No {
-                sim_v1 = v.clone();
-                m1 = moves.clone();
-                instr1 = instr.clone();
-                sim_v1.deaccelerate();
-                sim_v1.drive();
-                m1.drop_state();
-                instr1.push_back(Instruction::Deaccelerate);
-                res = self.algorithm(&m1, &sim_v1, instr1);
-                if res.len() > 0 {
-                    self.visited.insert(key, res.clone());
-                    return res;
-                }
-            }
-            sim_v1 = v.clone();
-            m1 = moves.clone();
-            instr1 = instr.clone();
-            sim_v1.drive();
-            m1.drop_state();
-            instr1.push_back(Instruction::Still);
-            res = self.algorithm(&m1, &sim_v1, instr1);
-            if res.len() > 0 {
-                self.visited.insert(key, res.clone());
-                return res;
-            }
-            self.visited.insert(key, res.clone());
-            return res;
-        }
-        if x < 0 {
-            x = 0
-        }
-        if y < 0 {
-            y = 0
-        }
+        let x = v.position.x / 2;
+        let y = v.position.y / 2;
         let (mut xs, mut ys) = (vec![x / 10], vec![y / 10]);
         let mut sim_moves = moves.clone();
         if x % 10 != 0 {
@@ -309,56 +227,34 @@ impl Algorithm {
         if y % 10 != 0 {
             ys.push((y / 10) + 1);
         }
+        let (mut a1, mut b1) = (0, 0);
+        match v.direction {
+            super::Direction::North => b1 -= 1,
+            super::Direction::South => b1 += 1,
+            super::Direction::East => a1 += 1,
+            super::Direction::West => a1 -= 1,
+        }
         for a in xs {
             for b in &ys {
-                let ok = sim_moves.states[0].is_occupied(a as usize, *b as usize);
+                let mut ok = sim_moves.states[0].is_occupied(a as usize, *b as usize);
                 if ok {
                     return VecDeque::new();
                 }
-                if sim_moves.states.len() > 1 {
-                    let ok = sim_moves.states[1].is_occupied(a as usize, *b as usize);
-                    if ok {
-                        return VecDeque::new();
-                    }
+                ok = sim_moves.states[0].is_occupied((a + a1) as usize, (*b + b1) as usize);
+                if ok {
+                    return VecDeque::new();
                 }
-                if sim_moves.states.len() > 2 {
-                    let ok = sim_moves.states[2].is_occupied(a as usize, *b as usize);
-                    if ok {
-                        return VecDeque::new();
-                    }
-                }
-                if sim_moves.states.len() > 3 {
-                    let ok = sim_moves.states[3].is_occupied(a as usize, *b as usize);
-                    if ok {
-                        return VecDeque::new();
-                    }
-                }
-                // sim_moves.states[0].occupy(a as usize, *b as usize);
             }
         }
         let mut sim_v1 = v.clone();
         let mut m1 = moves.clone();
         let mut instr1 = instr.clone();
-        let mut res = VecDeque::new();
+        let mut res:VecDeque<Instruction>;
         if v.speed != super::Speed::High {
             sim_v1.accelerate();
             sim_v1.drive();
             m1.drop_state();
             instr1.push_back(Instruction::Accelerate);
-            res = self.algorithm(&m1, &sim_v1, instr1);
-            if res.len() > 0 {
-                self.visited.insert(key, res.clone());
-                return res;
-            }
-        }
-        if v.speed != super::Speed::No {
-            sim_v1 = v.clone();
-            m1 = moves.clone();
-            instr1 = instr.clone();
-            sim_v1.deaccelerate();
-            sim_v1.drive();
-            m1.drop_state();
-            instr1.push_back(Instruction::Deaccelerate);
             res = self.algorithm(&m1, &sim_v1, instr1);
             if res.len() > 0 {
                 self.visited.insert(key, res.clone());
@@ -375,6 +271,20 @@ impl Algorithm {
         if res.len() > 0 {
             self.visited.insert(key, res.clone());
             return res;
+        }
+        if v.speed != super::Speed::No {
+            sim_v1 = v.clone();
+            m1 = moves.clone();
+            instr1 = instr.clone();
+            sim_v1.deaccelerate();
+            sim_v1.drive();
+            m1.drop_state();
+            instr1.push_back(Instruction::Deaccelerate);
+            res = self.algorithm(&m1, &sim_v1, instr1);
+            if res.len() > 0 {
+                self.visited.insert(key, res.clone());
+                return res;
+            }
         }
         self.visited.insert(key, res.clone());
         res

@@ -15,7 +15,6 @@ pub struct Vehicle {
     pub color: Color,
 }
 
-const SAFE_DISTANCE: i32 = 10;
 
 impl Vehicle {
     pub fn new(w: u32, h: u32, turn: Turning, direction: Direction, speed: Speed) -> Self {
@@ -114,35 +113,11 @@ impl Vehicle {
             }
         }
     }
-
-    pub fn is_safe_distance(self, previous: Vehicle) -> bool {
-        match self.direction {
-            Direction::North => {
-                self.position.y - previous.position.y - 30 - self.speed as i32 > SAFE_DISTANCE
-            }
-            Direction::South => {
-                previous.position.y - self.position.y - 30 - self.speed as i32 > SAFE_DISTANCE
-            }
-            Direction::West => {
-                self.position.x - previous.position.x - 30 - self.speed as i32 > SAFE_DISTANCE
-            }
-            Direction::East => {
-                previous.position.x - self.position.x - 30 - self.speed as i32 > SAFE_DISTANCE
-            }
-        }
-    }
     pub fn is_out(self) -> bool {
         self.position.x > self.environment.width
             || self.position.x < -20
             || self.position.y > self.environment.height
             || self.position.y < -20
-    }
-
-    pub fn in_intersection(self) -> bool {
-        self.position.x > (self.environment.center.x - 220)
-            && self.position.x < (self.environment.center.x + 200)
-            && self.position.y > (self.environment.center.y - 220)
-            && self.position.y < (self.environment.center.y + 200)
     }
     pub fn render(&mut self, canvas: &mut WindowCanvas) {
         let rect = Rect::new(self.position.x, self.position.y, 20, 20);
@@ -233,7 +208,7 @@ impl Pivot {
 
 // turning
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 pub enum Turning {
     Left,
     Right,
@@ -252,7 +227,7 @@ impl Rand for Turning {
 
 // direction
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
 pub enum Direction {
     North,
     South,
