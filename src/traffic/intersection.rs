@@ -45,12 +45,12 @@ impl Intersection {
             if ix >= self.moves.states.len() {
                 self.moves.add_state();
             }
-            let (mut xs, mut ys) = (vec![x / 10], vec![y / 10]);
-            if x % 10 != 0 {
-                xs.push((x / 10) + 1);
+            let (mut xs, mut ys) = (vec![x / 20], vec![y / 20]);
+            if x % 20 != 0 {
+                xs.push((x / 20) + 1);
             }
-            if y % 10 != 0 {
-                ys.push((y / 10) + 1);
+            if y % 20 != 0 {
+                ys.push((y / 20) + 1);
             }
             for a in xs {
                 for b in &ys {
@@ -160,20 +160,20 @@ pub struct State {
 
 impl State {
     pub fn new() -> Self {
-        let line = vec![false; 40];
+        let line = vec![false; 20];
         State {
-            board: vec![line; 40],
+            board: vec![line; 20],
         }
     }
     pub fn is_occupied(&mut self, x: usize, y: usize) -> bool {
-        if x >= 40 || y >= 40 {
+        if x >= 20 || y >= 20 {
             return false;
         }
         self.board[x][y]
     }
 
     pub fn occupy(&mut self, x: usize, y: usize) {
-        if x >= 40 || y >= 40 {
+        if x >= 20 || y >= 20 {
             return;
         }
         self.board[x][y] = true
@@ -219,13 +219,13 @@ impl Algorithm {
         }
         let x = v.position.x / 2;
         let y = v.position.y / 2;
-        let (mut xs, mut ys) = (vec![x / 10], vec![y / 10]);
+        let (mut xs, mut ys) = (vec![x / 20], vec![y / 20]);
         let mut sim_moves = moves.clone();
-        if x % 10 != 0 {
-            xs.push((x / 10) + 1);
+        if x % 20 != 0 {
+            xs.push((x / 20) + 1);
         }
-        if y % 10 != 0 {
-            ys.push((y / 10) + 1);
+        if y % 20 != 0 {
+            ys.push((y / 20) + 1);
         }
         let (mut a1, mut b1) = (0, 0);
         match v.direction {
