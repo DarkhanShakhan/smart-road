@@ -1,12 +1,14 @@
+mod layout;
 mod traffic;
+use layout::*;
 use rand::Rng;
 use sdl2::event::Event;
+use sdl2::image::LoadTexture;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
-use sdl2::rect::{Point, Rect};
-use sdl2::render::WindowCanvas;
 use std::time::Duration;
 use traffic::*;
+// use sdl2::image::{self, LoadTexture, InitFlag};
 
 fn main() {
     let sdl_context = sdl2::init().unwrap();
@@ -26,6 +28,14 @@ fn main() {
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut rng = rand::thread_rng();
     let mut smart_road = SmartRoad::new();
+    let texture_creator = canvas.texture_creator();
+    let texture = texture_creator.load_texture("assets/car.png").unwrap();
+    let city_texture_creator = canvas.texture_creator();
+    let city_texture = city_texture_creator
+        .load_texture("assets/city.png")
+        .unwrap();
+
+    //TODO:check for errors
     'running: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -33,7 +43,14 @@ fn main() {
                 | Event::KeyDown {
                     keycode: Some(Keycode::Escape),
                     ..
-                } => break 'running,
+                } => {
+                    let stats = smart_road.stats();
+                    println!(
+                        "Total cars: {}, Average velocity: {} km/h",
+                        stats.0, stats.1
+                    );
+                    break 'running;
+                }
                 Event::KeyDown {
                     keycode: Some(Keycode::Down),
                     ..
@@ -99,82 +116,10 @@ fn main() {
         }
         canvas.set_draw_color(Color::GREY);
         canvas.clear();
-        update_layout(&mut canvas);
-        smart_road.regulate(&mut canvas);
+        update_layout(&mut canvas, &city_texture);
+        smart_road.regulate(&mut canvas, &texture);
         canvas.present();
 
-        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 8));
-    }
-}
-
-fn update_layout(canvas: &mut WindowCanvas) {
-    let (width, height) = canvas.output_size().unwrap();
-    let (center_w, center_h) = (width as i32 / 2, height as i32 / 2);
-    let x = 40;
-    let (l_lane1, l_lane2, l_lane3) = (center_w - x, center_w - 2 * x, center_w - 3 * x);
-    let (low_lane1, low_lane2, low_lane3) = (center_h - x, center_h - 2 * x, center_h - 3 * x);
-    let (r_lane1, r_lane2, r_lane3) = (center_w + x, center_w + 2 * x, center_w + 3 * x);
-    let (top_lane1, top_lane2, top_lane3) = (center_h + x, center_h + 2 * x, center_h + 3 * x);
-    canvas.set_draw_color(Color::BLACK);
-    canvas
-        .draw_rect(Rect::new(
-            l_lane3,
-            low_lane3,
-            6 * x as u32 + 1,
-            6 * x as u32 + 1,
-        ))
-        .unwrap();
-    canvas
-        .draw_rect(Rect::new(
-            r_lane3,
-            -1,
-            l_lane3 as u32 + 1,
-            l_lane3 as u32 + 2,
-        ))
-        .unwrap();
-    canvas
-        .draw_rect(Rect::new(-1, -1, l_lane3 as u32 + 2, l_lane3 as u32 + 2))
-        .unwrap();
-    canvas
-        .draw_rect(Rect::new(
-            -1,
-            top_lane3,
-            l_lane3 as u32 + 2,
-            l_lane3 as u32 + 2,
-        ))
-        .unwrap();
-    canvas
-        .draw_rect(Rect::new(
-            r_lane3,
-            top_lane3,
-            l_lane3 as u32 + 2,
-            l_lane3 as u32 + 2,
-        ))
-        .unwrap();
-    draw_horizontal_lines(
-        vec![top_lane1, top_lane2, low_lane1, low_lane2, center_h],
-        width as i32,
-        canvas,
-    );
-    draw_vertical_lines(
-        vec![l_lane1, l_lane2, r_lane1, r_lane2, center_w],
-        height as i32,
-        canvas,
-    );
-    canvas.present();
-}
-
-fn draw_horizontal_lines(y: Vec<i32>, max_w: i32, canvas: &mut WindowCanvas) {
-    for p in y {
-        canvas
-            .draw_line(Point::new(0, p), Point::new(max_w, p))
-            .unwrap();
-    }
-}
-fn draw_vertical_lines(y: Vec<i32>, max_h: i32, canvas: &mut WindowCanvas) {
-    for p in y {
-        canvas
-            .draw_line(Point::new(p, 0), Point::new(p, max_h))
-            .unwrap();
+        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 4));
     }
 }

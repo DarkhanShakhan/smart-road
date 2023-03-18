@@ -1,7 +1,7 @@
 use rand::{Rand, Rng};
 use sdl2::pixels::Color;
 use sdl2::rect::Rect;
-use sdl2::render::WindowCanvas;
+use sdl2::render::{Texture, WindowCanvas};
 
 // vehicle
 #[derive(Clone, Debug, Copy)]
@@ -14,7 +14,6 @@ pub struct Vehicle {
     pub pivot: Pivot,
     pub color: Color,
 }
-
 
 impl Vehicle {
     pub fn new(w: u32, h: u32, turn: Turning, direction: Direction, speed: Speed) -> Self {
@@ -119,10 +118,19 @@ impl Vehicle {
             || self.position.y > self.environment.height
             || self.position.y < -40
     }
-    pub fn render(&mut self, canvas: &mut WindowCanvas) {
+    pub fn render(&mut self, canvas: &mut WindowCanvas, texture: &Texture) {
         let rect = Rect::new(self.position.x, self.position.y, 40, 40);
-        canvas.set_draw_color(self.color);
-        canvas.fill_rect(rect).unwrap();
+        let mut sprite = Rect::new(3, 5, 60, 60);
+        match self.direction {
+            Direction::South => {}
+            Direction::North => sprite = Rect::new(3, 205, 60, 60),
+            Direction::East => sprite = Rect::new(3, 135, 60, 60),
+            Direction::West => sprite = Rect::new(3, 65, 60, 60),
+        }
+        Rect::new(5, 5, 60, 60);
+        // canvas.set_draw_color(Color::GRAY);
+        // canvas.fill_rect(rect).unwrap();
+        canvas.copy(texture, sprite, rect).unwrap();
     }
 }
 

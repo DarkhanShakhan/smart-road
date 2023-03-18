@@ -1,5 +1,5 @@
 use super::Vehicle;
-use sdl2::render::WindowCanvas;
+use sdl2::render::{Texture, WindowCanvas};
 use std::collections::{HashMap, VecDeque};
 
 pub struct Intersection {
@@ -27,7 +27,7 @@ impl Intersection {
         let instrs = self.instruct_vehicle(&v);
         if instrs.len() == 0 {
             self.waiting_room.push(v);
-            return
+            return;
         }
         self.vehicles.push_back(InstructedVehicle::new(v, instrs));
     }
@@ -35,7 +35,7 @@ impl Intersection {
         let mut algo = Algorithm::new();
         let mut res = algo.algorithm(&self.moves, v, VecDeque::new());
         if res.len() == 0 && self.moves.states.len() > 0 {
-            return VecDeque::new()
+            return VecDeque::new();
         }
         let mut sim_v = v.clone();
         let mut ix = 0;
@@ -78,10 +78,14 @@ impl Intersection {
         }
         res
     }
-    pub fn regulate(&mut self, canvas: &mut WindowCanvas) -> Option<Vec<Vehicle>> {
+    pub fn regulate(
+        &mut self,
+        canvas: &mut WindowCanvas,
+        texture: &Texture,
+    ) -> Option<Vec<Vehicle>> {
         let mut list = vec![];
         for ix in 0..self.vehicles.len() {
-            self.vehicles[ix].follow_instruction(canvas);
+            self.vehicles[ix].follow_instruction(canvas, texture);
             if self.vehicles[ix].is_empty_instructions() {
                 list.push(ix)
             }
@@ -98,6 +102,21 @@ impl Intersection {
             None
         }
     }
+    pub fn average_velocity(&self) -> u32 {
+        let mut total = 0;
+        for v in &self.vehicles {
+            match v.vehicle.speed {
+                super::Speed::High => total += 30,
+                super::Speed::Normal => total += 20,
+                super::Speed::Low => total += 10,
+                super::Speed::No => {}
+            }
+        }
+        if self.vehicles.len() == 0 {
+            return 0
+       }
+       (total / self.vehicles.len()) as u32
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -113,14 +132,14 @@ impl InstructedVehicle {
             instructions: instrs,
         }
     }
-    pub fn follow_instruction(&mut self, canvas: &mut WindowCanvas) {
+    pub fn follow_instruction(&mut self, canvas: &mut WindowCanvas, texture: &Texture) {
         match self.instructions[0] {
             Instruction::Still => {}
             Instruction::Deaccelerate => self.vehicle.deaccelerate(),
             Instruction::Accelerate => self.vehicle.accelerate(),
         }
         self.vehicle.drive();
-        self.vehicle.render(canvas);
+        self.vehicle.render(canvas, texture);
         self.instructions.pop_front();
     }
     pub fn is_empty_instructions(&self) -> bool {
@@ -249,7 +268,7 @@ impl Algorithm {
         let mut sim_v1 = v.clone();
         let mut m1 = moves.clone();
         let mut instr1 = instr.clone();
-        let mut res:VecDeque<Instruction>;
+        let mut res: VecDeque<Instruction>;
         if v.speed != super::Speed::High {
             sim_v1.accelerate();
             sim_v1.drive();
