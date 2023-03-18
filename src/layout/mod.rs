@@ -1,5 +1,7 @@
 use sdl2::rect::Rect;
 use sdl2::render::{Texture, WindowCanvas};
+use sdl2::ttf::Font;
+// use sdl2::ttf::Font;
 
 pub fn update_layout(canvas: &mut WindowCanvas, texture: &Texture) {
     yard(canvas, texture, 0, 0);
@@ -34,7 +36,7 @@ pub fn update_layout(canvas: &mut WindowCanvas, texture: &Texture) {
         r2 = Rect::new(0 + 40 * i, 397, 40, 10);
         canvas.copy(texture, r1, r2).unwrap();
     }
-    canvas.present();
+    // canvas.present();
 }
 
 fn yard(canvas: &mut WindowCanvas, texture: &Texture, abs_x: i32, abs_y: i32) {
@@ -94,4 +96,55 @@ fn yard(canvas: &mut WindowCanvas, texture: &Texture, abs_x: i32, abs_y: i32) {
             canvas.copy(texture, src, dst).unwrap();
         }
     }
+}
+
+pub fn stats_layout(
+    canvas: &mut WindowCanvas,
+    avg_speed: u32,
+    total_cars: u32,
+    font: &Font,
+    texture: &Texture,
+) {
+    canvas.clear();
+    yard(canvas, texture, 260, 260);
+    // let surface = font.render("statistics\nspeed: 25 km/h\ntotal cars: 10").solid(Color::BLACK).unwrap();
+    let mut surface = font
+        .render("statistics")
+        .blended(sdl2::pixels::Color::BLACK)
+        .unwrap();
+    // let h  = font.height();
+    // let h = surface.height();
+    // surface.width();
+    let mut size = surface.size();
+    let texture_creator = canvas.texture_creator();
+    let mut texture = texture_creator
+        .create_texture_from_surface(&surface)
+        .unwrap();
+    let mut rect = Rect::new(280, 320, size.0/8, size.1/8);
+    canvas.copy(&texture, None, rect).unwrap();
+    
+    surface = font
+        .render(&format!("average speed {}km/h", avg_speed))
+        .blended(sdl2::pixels::Color::BLACK)
+        .unwrap();
+    size = surface.size();
+    rect = Rect::new(280, 355, size.0/8, size.1/8);
+    texture = texture_creator
+        .create_texture_from_surface(&surface)
+        .unwrap();
+    canvas.copy(&texture, None, rect).unwrap();
+    
+    surface = font
+        .render(&format!("total cars {}", total_cars))
+        .blended(sdl2::pixels::Color::BLACK)
+        .unwrap();
+    size = surface.size();
+    rect = Rect::new(280, 380, size.0/8, size.1/8);
+    texture = texture_creator
+        .create_texture_from_surface(&surface)
+        .unwrap();
+    canvas.copy(&texture, None, rect).unwrap();
+    // let texture_text = texture_creator
+    // .create_texture_from_surface(&surface).unwrap();
+    // let rect = Rect::new(25,25,150,60);
 }

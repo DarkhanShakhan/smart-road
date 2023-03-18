@@ -21,7 +21,7 @@ fn main() {
         .unwrap();
     let mut canvas = window.into_canvas().build().unwrap();
 
-    canvas.set_draw_color(Color::RGB(0, 255, 255));
+    canvas.set_draw_color(Color::WHITE);
     let (width, height) = canvas.output_size().unwrap();
     canvas.clear();
     canvas.present();
@@ -29,12 +29,18 @@ fn main() {
     let mut rng = rand::thread_rng();
     let mut smart_road = SmartRoad::new();
     let texture_creator = canvas.texture_creator();
-    let texture = texture_creator.load_texture("assets/car.png").unwrap();
+    let car_texture = texture_creator.load_texture("assets/car.png").unwrap();
     let city_texture_creator = canvas.texture_creator();
     let city_texture = city_texture_creator
         .load_texture("assets/city.png")
         .unwrap();
 
+    let ttf_context = sdl2::ttf::init().unwrap();
+    let exp_font = ttf_context
+        .load_font(std::path::Path::new("assets/expressway.otf"), 150)
+        .unwrap();
+    let mut is_stats = false;
+    let mut stats = (0, 0);
     //TODO:check for errors
     'running: loop {
         for event in event_pump.poll_iter() {
@@ -44,12 +50,12 @@ fn main() {
                     keycode: Some(Keycode::Escape),
                     ..
                 } => {
-                    let stats = smart_road.stats();
-                    println!(
-                        "Total cars: {}, Average velocity: {} km/h",
-                        stats.0, stats.1
-                    );
-                    break 'running;
+                    if is_stats {
+                        break 'running;
+                    } else {
+                        is_stats = true;
+                        stats = smart_road.stats();
+                    }
                 }
                 Event::KeyDown {
                     keycode: Some(Keycode::Down),
@@ -114,12 +120,13 @@ fn main() {
                 _ => {}
             }
         }
-        canvas.set_draw_color(Color::GREY);
-        canvas.clear();
-        update_layout(&mut canvas, &city_texture);
-        smart_road.regulate(&mut canvas, &texture);
+        if is_stats {
+            stats_layout(&mut canvas, stats.1, stats.0, &exp_font, &city_texture);
+        } else {
+            update_layout(&mut canvas, &city_texture);
+            smart_road.regulate(&mut canvas, &car_texture);
+        }
         canvas.present();
-
-        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 4));
+        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 8));
     }
 }

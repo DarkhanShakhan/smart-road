@@ -113,9 +113,9 @@ impl Intersection {
             }
         }
         if self.vehicles.len() == 0 {
-            return 0
-       }
-       (total / self.vehicles.len()) as u32
+            return 0;
+        }
+        (total / self.vehicles.len()) as u32
     }
 }
 

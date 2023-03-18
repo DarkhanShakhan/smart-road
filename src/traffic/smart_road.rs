@@ -25,9 +25,15 @@ impl SmartRoad {
         self.intersection.waiting();
         self.intersection.regulate(canvas, texture);
         self.intersection.moves.drop_state();
-        self.average_velocity = (self.intersection.average_velocity() + self.average_velocity) / 2;
+        if self.intersection.average_velocity() != 0 {
+            self.average_velocity =
+                (self.intersection.average_velocity() + self.average_velocity) / 2;
+        }
     }
-    pub fn stats(self) -> (u32, u32) {
-        (self.total_cars, self.average_velocity)
+    pub fn stats(&self) -> (u32, u32) {
+        (
+            self.total_cars - self.intersection.waiting_room.len() as u32,
+            self.average_velocity,
+        )
     }
 }
