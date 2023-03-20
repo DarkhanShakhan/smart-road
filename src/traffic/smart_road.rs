@@ -16,7 +16,6 @@ impl SmartRoad {
             average_velocity: 0,
         }
     }
-
     pub fn add_vehicle(&mut self, v: Vehicle) {
         self.intersection.add_vehicle(v);
         self.total_cars += 1;
@@ -30,10 +29,40 @@ impl SmartRoad {
                 (self.intersection.average_velocity() + self.average_velocity) / 2;
         }
     }
-    pub fn stats(&self) -> (u32, u32) {
-        (
-            self.total_cars - self.intersection.waiting_room.len() as u32,
-            self.average_velocity,
-        )
+    pub fn stats(&self) -> Stats {
+        Stats {
+            total_cars: self.total_cars - self.intersection.waiting_room.len() as u32,
+            max_velocity: self.intersection.max_velocity,
+            min_velocity: self.intersection.min_velocity,
+            average_velocity: self.average_velocity,
+            max_time: self.intersection.max_time,
+            min_time: self.intersection.min_time,
+        }
+        // (
+        //     self.total_cars - self.intersection.waiting_room.len() as u32,
+        //     self.average_velocity,
+        // )
+    }
+}
+#[derive(Clone, Debug, Copy)]
+pub struct Stats {
+    pub total_cars: u32,
+    pub max_velocity: u32,
+    pub min_velocity: u32,
+    pub average_velocity: u32,
+    pub max_time: u32,
+    pub min_time: u32,
+}
+
+impl Stats {
+    pub fn new() -> Self {
+        Stats {
+            total_cars: 0,
+            max_velocity: 0,
+            min_velocity: 0,
+            average_velocity: 0,
+            max_time: 0,
+            min_time: 0,
+        }
     }
 }

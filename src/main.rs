@@ -8,7 +8,6 @@ use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use std::time::Duration;
 use traffic::*;
-// use sdl2::image::{self, LoadTexture, InitFlag};
 
 fn main() {
     let sdl_context = sdl2::init().unwrap();
@@ -40,8 +39,7 @@ fn main() {
         .load_font(std::path::Path::new("assets/expressway.otf"), 150)
         .unwrap();
     let mut is_stats = false;
-    let mut stats = (0, 0);
-    //TODO:check for errors
+    let mut stats = Stats::new();
     'running: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -51,6 +49,7 @@ fn main() {
                     ..
                 } => {
                     if is_stats {
+                        println!("{:?}", stats);
                         break 'running;
                     } else {
                         is_stats = true;
@@ -121,12 +120,12 @@ fn main() {
             }
         }
         if is_stats {
-            stats_layout(&mut canvas, stats.1, stats.0, &exp_font, &city_texture);
+            stats_layout(&mut canvas, stats, &exp_font, &city_texture);
         } else {
             update_layout(&mut canvas, &city_texture);
             smart_road.regulate(&mut canvas, &car_texture);
         }
         canvas.present();
-        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 8));
+        std::thread::sleep(Duration::from_millis(100));
     }
 }

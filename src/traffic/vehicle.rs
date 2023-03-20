@@ -13,6 +13,7 @@ pub struct Vehicle {
     pub environment: Environment,
     pub pivot: Pivot,
     pub color: Color,
+    pub time: u32,
 }
 
 impl Vehicle {
@@ -31,7 +32,8 @@ impl Vehicle {
             speed,
             environment: Environment::new(w as i32, h as i32),
             pivot: Pivot::new(Environment::new(w as i32, h as i32), direction, turn),
-            color: color,
+            color,
+            time: 0,
         }
     }
     pub fn accelerate(&mut self) {
@@ -128,9 +130,15 @@ impl Vehicle {
             Direction::West => sprite = Rect::new(3, 65, 60, 60),
         }
         Rect::new(5, 5, 60, 60);
-        // canvas.set_draw_color(Color::GRAY);
-        // canvas.fill_rect(rect).unwrap();
         canvas.copy(texture, sprite, rect).unwrap();
+    }
+    pub fn get_speed(self) -> u32 {
+        match self.speed {
+            Speed::High => 30,
+            Speed::Normal => 20,
+            Speed::Low => 10,
+            Speed::No => 0,
+        }
     }
 }
 

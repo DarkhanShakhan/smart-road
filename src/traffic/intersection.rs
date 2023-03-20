@@ -6,6 +6,10 @@ pub struct Intersection {
     pub vehicles: VecDeque<InstructedVehicle>,
     pub moves: Moves,
     pub waiting_room: Vec<Vehicle>,
+    pub min_time: u32,
+    pub max_time: u32,
+    pub min_velocity: u32,
+    pub max_velocity: u32,
 }
 
 impl Intersection {
@@ -14,6 +18,10 @@ impl Intersection {
             vehicles: VecDeque::new(),
             moves: Moves::new(),
             waiting_room: vec![],
+            min_time: u32::MAX,
+            max_time: u32::MIN,
+            min_velocity: u32::MAX,
+            max_velocity: u32::MIN,
         }
     }
     pub fn waiting(&mut self) {
@@ -23,8 +31,9 @@ impl Intersection {
             self.add_vehicle(v);
         }
     }
-    pub fn add_vehicle(&mut self, v: Vehicle) {
+    pub fn add_vehicle(&mut self, mut v: Vehicle) {
         let instrs = self.instruct_vehicle(&v);
+        v.time += 1;
         if instrs.len() == 0 {
             self.waiting_room.push(v);
             return;
@@ -78,44 +87,43 @@ impl Intersection {
         }
         res
     }
-    pub fn regulate(
-        &mut self,
-        canvas: &mut WindowCanvas,
-        texture: &Texture,
-    ) -> Option<Vec<Vehicle>> {
+    pub fn regulate(&mut self, canvas: &mut WindowCanvas, texture: &Texture) {
         let mut list = vec![];
         for ix in 0..self.vehicles.len() {
+            let v = self.vehicles[ix].vehicle.get_speed();
+            if v > self.max_velocity {
+                self.max_velocity = v;
+            }
+            if v < self.min_velocity {
+                self.min_velocity = v;
+            }
+            self.vehicles[ix].vehicle.time += 1;
             self.vehicles[ix].follow_instruction(canvas, texture);
             if self.vehicles[ix].is_empty_instructions() {
-                list.push(ix)
+                list.push(ix);
+                let t = self.vehicles[ix].vehicle.time;
+                if t > self.max_time {
+                    self.max_time = t;
+                }
+                if t < self.min_time {
+                    self.min_time = t;
+                }
             }
         }
         list.reverse();
-        let mut result = vec![];
         for jx in list {
-            result.push(self.vehicles[jx].vehicle);
             self.vehicles.remove(jx);
-        }
-        if result.len() != 0 {
-            Some(result)
-        } else {
-            None
         }
     }
     pub fn average_velocity(&self) -> u32 {
         let mut total = 0;
         for v in &self.vehicles {
-            match v.vehicle.speed {
-                super::Speed::High => total += 30,
-                super::Speed::Normal => total += 20,
-                super::Speed::Low => total += 10,
-                super::Speed::No => {}
-            }
+            total += v.vehicle.get_speed();
         }
         if self.vehicles.len() == 0 {
             return 0;
         }
-        (total / self.vehicles.len()) as u32
+        total / (self.vehicles.len() as u32)
     }
 }
 
