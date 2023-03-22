@@ -49,7 +49,6 @@ fn main() {
                     ..
                 } => {
                     if is_stats {
-                        println!("{:?}", stats);
                         break 'running;
                     } else {
                         is_stats = true;
@@ -57,7 +56,7 @@ fn main() {
                     }
                 }
                 Event::KeyDown {
-                    keycode: Some(Keycode::Down),
+                    keycode: Some(Keycode::Up),
                     ..
                 } => {
                     smart_road.add_vehicle(Vehicle::new(
@@ -69,7 +68,7 @@ fn main() {
                     ));
                 }
                 Event::KeyDown {
-                    keycode: Some(Keycode::Up),
+                    keycode: Some(Keycode::Down),
                     ..
                 } => {
                     smart_road.add_vehicle(Vehicle::new(
@@ -81,7 +80,7 @@ fn main() {
                     ));
                 }
                 Event::KeyDown {
-                    keycode: Some(Keycode::Left),
+                    keycode: Some(Keycode::Right),
                     ..
                 } => {
                     smart_road.add_vehicle(Vehicle::new(
@@ -93,7 +92,7 @@ fn main() {
                     ));
                 }
                 Event::KeyDown {
-                    keycode: Some(Keycode::Right),
+                    keycode: Some(Keycode::Left),
                     ..
                 } => {
                     smart_road.add_vehicle(Vehicle::new(

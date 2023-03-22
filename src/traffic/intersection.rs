@@ -10,6 +10,8 @@ pub struct Intersection {
     pub max_time: u32,
     pub min_velocity: u32,
     pub max_velocity: u32,
+    pub nbr_passed_vehicles: u32,
+    pub avg_velocity: f32,
 }
 
 impl Intersection {
@@ -22,6 +24,8 @@ impl Intersection {
             max_time: u32::MIN,
             min_velocity: u32::MAX,
             max_velocity: u32::MIN,
+            nbr_passed_vehicles: u32::MIN,
+            avg_velocity: 0.0,
         }
     }
     pub fn waiting(&mut self) {
@@ -89,6 +93,7 @@ impl Intersection {
     }
     pub fn regulate(&mut self, canvas: &mut WindowCanvas, texture: &Texture) {
         let mut list = vec![];
+        let mut total = 0.0;
         for ix in 0..self.vehicles.len() {
             let v = self.vehicles[ix].vehicle.get_speed();
             if v > self.max_velocity {
@@ -97,9 +102,11 @@ impl Intersection {
             if v < self.min_velocity {
                 self.min_velocity = v;
             }
+            total += v as f32;
             self.vehicles[ix].vehicle.time += 1;
             self.vehicles[ix].follow_instruction(canvas, texture);
             if self.vehicles[ix].is_empty_instructions() {
+                self.nbr_passed_vehicles += 1;
                 list.push(ix);
                 let t = self.vehicles[ix].vehicle.time;
                 if t > self.max_time {
@@ -110,20 +117,21 @@ impl Intersection {
                 }
             }
         }
+        if self.vehicles.len() > 0 {
+            if self.average_velocity() == 0.0 {
+                self.avg_velocity = total / self.vehicles.len() as f32;
+            } else {
+                self.avg_velocity =
+                    ((total / self.vehicles.len() as f32) + self.avg_velocity) / 2.0;
+            }
+        }
         list.reverse();
         for jx in list {
             self.vehicles.remove(jx);
         }
     }
-    pub fn average_velocity(&self) -> u32 {
-        let mut total = 0;
-        for v in &self.vehicles {
-            total += v.vehicle.get_speed();
-        }
-        if self.vehicles.len() == 0 {
-            return 0;
-        }
-        total / (self.vehicles.len() as u32)
+    pub fn average_velocity(&self) -> f32 {
+        self.avg_velocity
     }
 }
 
